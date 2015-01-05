@@ -1,9 +1,16 @@
 #![feature(old_orphan_check)]
+#![feature(associated_types)]
 
 extern crate "rustc-serialize" as rustc_serialize;
 extern crate docopt;
 
 use docopt::Docopt;
+use backend::LanguageBackend;
+
+mod graph;
+mod backend;
+mod files;
+
 
 static USAGE: &'static str = "Usage: machete <path>";
 
