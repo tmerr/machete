@@ -1,9 +1,9 @@
 use graph::Graph;
 
 pub trait LanguageBackend {
-    fn get_extensions() -> Vec<String>;
-    fn get_graph_types() -> Vec<GraphType>;
-    fn build_graph(filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()>;
+    fn get_extensions(&self) -> Vec<String>;
+    fn get_graph_types(&self) -> Vec<GraphType>;
+    fn build_graph(&self, filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()>;
 }
 
 
@@ -15,15 +15,15 @@ pub enum GraphType {
 }
 
 impl LanguageBackend for Csharp {
-    fn get_extensions() -> Vec<String> {
+    fn get_extensions(&self) -> Vec<String> {
         vec!["cs".to_string()]
     }
 
-    fn get_graph_types() -> Vec<GraphType> {
+    fn get_graph_types(&self) -> Vec<GraphType> {
         vec![GraphType::Reference]
     }
 
-    fn build_graph(filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()> {
+    fn build_graph(&self, filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()> {
         let mut g = Graph::new();
 
         let a = g.add_node("a".to_string());

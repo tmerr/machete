@@ -6,6 +6,8 @@ extern crate docopt;
 
 use docopt::Docopt;
 use backend::LanguageBackend;
+use files::FileGroup;
+use backend::GraphType;
 
 mod graph;
 mod backend;
@@ -24,5 +26,30 @@ fn main() {
         .and_then(|d| d.decode())
         .unwrap_or_else(|e| e.exit());
 
-    let path = args.arg_path;
+    run(args.arg_path);
+}
+
+fn run(path: String) {
+    let backends = [backend::Csharp];
+
+    let mut exts = vec![];
+    for backend in backends.iter() {
+        exts.push_all(backend.get_extensions().as_slice());
+    }
+    
+    let groups = files::gather_files(path, exts.as_slice());
+    for group in groups.iter() {
+        println!("{}", group.ext);
+        println!("{}", group.filenames);
+    }
+
+    for backend in backends.iter() {
+        let mut fnames = vec![];
+        for group in groups.iter() {
+            if backend.get_extensions().contains(&group.ext) {
+                fnames.push_all(group.filenames.as_slice());
+            }
+        }
+        let graph = backend.build_graph(fnames, GraphType::Reference);
+    }
 }
