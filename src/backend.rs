@@ -2,18 +2,28 @@ use graph::Graph;
 
 pub trait LanguageBackend {
     fn get_extensions() -> Vec<String>;
-    fn build_graph(filenames: Vec<String>) -> Graph<String, ()>;
+    fn get_graph_types() -> Vec<GraphType>;
+    fn build_graph(filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()>;
 }
 
 
 pub struct Csharp;
+
+pub enum GraphType {
+    Reference,
+    Inheritance,
+}
 
 impl LanguageBackend for Csharp {
     fn get_extensions() -> Vec<String> {
         vec!["cs".to_string()]
     }
 
-    fn build_graph(filenames: Vec<String>) -> Graph<String, ()> {
+    fn get_graph_types() -> Vec<GraphType> {
+        vec![GraphType::Reference]
+    }
+
+    fn build_graph(filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()> {
         let mut g = Graph::new();
 
         let a = g.add_node("a".to_string());
@@ -25,3 +35,4 @@ impl LanguageBackend for Csharp {
         g
     }
 }
+
