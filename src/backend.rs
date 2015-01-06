@@ -1,9 +1,10 @@
 use graph::Graph;
+use std::path::posix::Path;
 
 pub trait LanguageBackend {
     fn get_extensions(&self) -> Vec<String>;
     fn get_graph_types(&self) -> Vec<GraphType>;
-    fn build_graph(&self, filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()>;
+    fn build_graph(&self, filenames: &[Path], graphtype: GraphType) -> Graph<String, ()>;
 }
 
 
@@ -23,7 +24,7 @@ impl LanguageBackend for Csharp {
         vec![GraphType::Reference]
     }
 
-    fn build_graph(&self, filenames: Vec<String>, graphtype: GraphType) -> Graph<String, ()> {
+    fn build_graph(&self, filenames: &[Path], graphtype: GraphType) -> Graph<String, ()> {
         let mut g = Graph::new();
 
         let a = g.add_node("a".to_string());

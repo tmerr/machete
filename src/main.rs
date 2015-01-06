@@ -6,8 +6,9 @@ extern crate docopt;
 
 use docopt::Docopt;
 use backend::LanguageBackend;
-use files::FileGroup;
+use files::GroupedFiles;
 use backend::GraphType;
+use graph::Graph;
 
 mod graph;
 mod backend;
@@ -38,18 +39,20 @@ fn run(path: String) {
     }
     
     let groups = files::gather_files(path, exts.as_slice());
-    for group in groups.iter() {
-        println!("{}", group.ext);
-        println!("{}", group.filenames);
-    }
 
     for backend in backends.iter() {
         let mut fnames = vec![];
-        for group in groups.iter() {
-            if backend.get_extensions().contains(&group.ext) {
-                fnames.push_all(group.filenames.as_slice());
-            }
+        for ext in backend.get_extensions().iter() {
+            match groups.get(ext) {
+                Some(results) => fnames.push_all(results.as_slice()),
+                None => {},
+            };
         }
-        let graph = backend.build_graph(fnames, GraphType::Reference);
+        let g = backend.build_graph(fnames.as_slice(), GraphType::Reference);
+        print_ascii_graph(&g);
     }
+}
+
+fn print_ascii_graph(g: &Graph<String, ()>) {
+    println!("print graph here");
 }
