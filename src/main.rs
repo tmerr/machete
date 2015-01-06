@@ -6,7 +6,6 @@ extern crate docopt;
 
 use docopt::Docopt;
 use backend::LanguageBackend;
-use files::GroupedFiles;
 use backend::GraphType;
 use graph::Graph;
 
@@ -54,5 +53,16 @@ fn run(path: String) {
 }
 
 fn print_ascii_graph(g: &Graph<String, ()>) {
-    println!("print graph here");
+    println!("Nodes:");
+    g.each_node(|_, node| {
+        println!("\t{}", node.data);
+        true
+    });
+    println!("Edges:");
+    g.each_edge(|_, edge| {
+        println!("\t({}, {})",
+                 g.node_data(edge.source()),
+                 g.node_data(edge.target()));
+        true
+    });
 }
