@@ -1,8 +1,14 @@
-#![feature(old_orphan_check)]
 #![feature(associated_types)]
+#![feature(phase)]
 
+extern crate serialize;
 extern crate "rustc-serialize" as rustc_serialize;
+
 extern crate docopt;
+#[phase(plugin)] extern crate docopt_macros;
+
+extern crate regex;
+#[phase(plugin)] extern crate regex_macros;
 
 use docopt::Docopt;
 use backend::LanguageBackend;
@@ -13,19 +19,10 @@ mod graph;
 mod backend;
 mod files;
 
-
-static USAGE: &'static str = "Usage: machete <path>";
-
-#[derive(RustcDecodable, Show)]
-struct Args {
-    arg_path: String,
-}
+docopt!(Args derive Show, "Usage: machete <path>");
 
 fn main() {
-    let args : Args = Docopt::new(USAGE)
-        .and_then(|d| d.decode())
-        .unwrap_or_else(|e| e.exit());
-
+    let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
     run(args.arg_path);
 }
 

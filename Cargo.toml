@@ -5,5 +5,12 @@ version = "0.0.1"
 authors = ["tmerr <trevorm42@gmail.com>"]
 
 [dependencies.docopt]
-
 git = "https://github.com/docopt/docopt.rs.git"
+
+[dependencies.docopt_macros]
+git = "git://github.com/docopt/docopt.rs"
+
+[dependencies]
+regex = "*"
+regex_macros = "*"
+rustc-serialize= "*"
