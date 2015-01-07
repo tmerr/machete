@@ -32,7 +32,7 @@ pub fn gather_files(path: String, exts: &[String]) -> GroupedFiles {
                 }
             }
         },
-        Err(E) => panic!("Failed to open directory"),
+        Err(_) => panic!("Failed to open directory"),
     };
 
     groups
