@@ -14,21 +14,14 @@ pub fn gather_files(path: String, exts: &[String]) -> GroupedFiles {
     match walk_dir(&thepath) {
         Ok(mut fpaths) => {
             for fpath in fpaths {
-                match fpath.extension_str() {
-                    Some(s) => {
-                        let string = String::from_str(s);
-                        if exts.contains(&string) {
-                            if !groups.contains_key(&string) {
-                                groups.insert(string.clone(), vec![]);
-                            }
-                            match groups.get_mut(&string) {
-                                Some(mut vec) => vec.push(fpath.clone()),
-                                None => panic!("Error"),
-                            }
+                if let Some(s) = fpath.extension_str() {
+                    let string = s.to_string();
+                    if exts.contains(&string) {
+                        if !groups.contains_key(&string) {
+                            groups.insert(string.clone(), vec![]);
                         }
-                    },
-                    None => {
-                    },
+                        groups.get_mut(&string).unwrap().push(fpath.clone());
+                    }
                 }
             }
         },
