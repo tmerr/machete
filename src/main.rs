@@ -1,14 +1,13 @@
-#![feature(associated_types)]
-#![feature(phase)]
+#![feature(plugin)]
 
 extern crate serialize;
 extern crate "rustc-serialize" as rustc_serialize;
 
 extern crate docopt;
-#[phase(plugin)] extern crate docopt_macros;
+#[no_link] #[plugin] extern crate docopt_macros;
 
 extern crate regex;
-#[phase(plugin)] extern crate regex_macros;
+#[no_link] #[plugin] extern crate regex_macros;
 
 use docopt::Docopt;
 use backend::LanguageBackend;
