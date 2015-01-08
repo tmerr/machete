@@ -38,10 +38,9 @@ fn run(path: String) {
     for backend in backends.iter() {
         let mut fnames = vec![];
         for ext in backend.get_extensions().iter() {
-            match groups.get(ext) {
-                Some(results) => fnames.push_all(results.as_slice()),
-                None => {},
-            };
+            if let Some(results) = groups.get(ext) {
+                fnames.push_all(results.as_slice());
+            }
         }
 
         let g = backend.build_graph(fnames.as_slice(), GraphType::Reference);
