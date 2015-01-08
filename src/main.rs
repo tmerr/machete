@@ -36,10 +36,13 @@ fn run(path: String) {
     let groups = files::gather_files(path, exts.as_slice());
 
     for backend in backends.iter() {
-
-        let fnames: Vec<Path> = backend.get_extensions().iter().flat_map(
-                                |ext| groups.get(ext).unwrap().iter().map(|p| p.clone())
-                                ).collect();
+        let mut fnames = vec![];
+        for ext in backend.get_extensions().iter() {
+            match groups.get(ext) {
+                Some(results) => fnames.push_all(results.as_slice()),
+                None => {},
+            };
+        }
 
         let g = backend.build_graph(fnames.as_slice(), GraphType::Reference);
         print_ascii_graph(&g);
