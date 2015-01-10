@@ -13,13 +13,13 @@ extern crate regex;
 
 use docopt::Docopt;
 use backend::LanguageBackend;
-use backend::GraphType;
 use graph::Graph;
 
 mod graph;
 mod backend;
 mod files;
 mod lexer;
+mod csharp;
 
 docopt!(Args derive Show, "Usage: machete <path>");
 
@@ -29,7 +29,7 @@ fn main() {
 }
 
 fn run(path: String) {
-    let backends = [backend::Csharp];
+    let backends = [csharp::Csharp];
 
     let mut exts = vec![];
     for backend in backends.iter() {
@@ -46,8 +46,10 @@ fn run(path: String) {
             }
         }
 
-        let g = backend.build_graph(&fnames[], GraphType::Reference);
-        print_ascii_graph(&g);
+        let gs = backend.build_graphs(&fnames[]);
+        for g in gs.iter() {
+            print_ascii_graph(&g.graph);
+        }
     }
 }
 
