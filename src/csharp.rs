@@ -176,4 +176,21 @@ mod tests {
 
         assert_eq!(&kind[], &expected[]);
     }
+
+    #[test]
+    fn test_class_x() {
+        let lexer = super::build_csharp_lexer();
+        let mut iter = lexer.lex("class Fizz\n{\nBuzz buzz}\n}");
+        iter.next(); // consume "class"
+        match super::class_x(&mut iter) {
+            Some((classname, set)) => {
+                assert_eq!(classname, "Fizz");
+                assert!(set.contains("Buzz"));
+                assert!(set.contains("buzz"));
+            },
+            None => {
+                panic!("Test failed.");
+            },
+        }
+    }
 }
