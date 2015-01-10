@@ -1,8 +1,10 @@
 use graph::Graph;
 use std::io::File;
 use std::path::posix::Path;
-use self::TokenClass::{Whitespace, Newline, Comment, BlockBegin, BlockEnd, IdentifierOrKeyword, Unknown};
+use self::TokenClass::{Whitespace, Newline, Comment, BlockBegin, BlockEnd, IdentifierOrKeyword};
 use regex::Regex;
+use lexer::Lexer;
+use lexer::Result::{Matched, Unmatched};
 
 
 pub trait LanguageBackend {
@@ -51,14 +53,14 @@ impl LanguageBackend for Csharp {
 
             for tok in lexer.lex(&text[]) {
                 match (tok.0, &tok.1[]) {
-                    (Whitespace, _) => {},
-                    (Newline, _) => {},
-                    (Comment, _) => {},
-                    (BlockBegin, _) => {},
-                    (BlockEnd, _) => {},
-                    (IdentifierOrKeyword, "class") => {},
-                    (IdentifierOrKeyword, _) => {},
-                    (Unknown, _) => {},
+                    (Matched(Whitespace), _) => {},
+                    (Matched(Newline), _) => {},
+                    (Matched(Comment), _) => {},
+                    (Matched(BlockBegin), _) => {},
+                    (Matched(BlockEnd), _) => {},
+                    (Matched(IdentifierOrKeyword), "class") => {},
+                    (Matched(IdentifierOrKeyword), _) => {},
+                    (Unmatched, _) => {},
                 }
             }
         }
@@ -86,10 +88,9 @@ enum TokenClass {
     BlockBegin,
     BlockEnd,
     IdentifierOrKeyword,
-    Unknown,
 }
 
-fn build_csharp_lexer() -> Lexer {
+fn build_csharp_lexer() -> Lexer<TokenClass> {
     let mut lexer = Lexer::new();
 
     lexer.define_token(Whitespace, regex!(r"^\p{Zs}|\x{0009}|\x{000B}\x{000C}"));
@@ -100,65 +101,6 @@ fn build_csharp_lexer() -> Lexer {
     lexer.define_token(IdentifierOrKeyword, regex!(r"^(_|\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl})(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}\p{Nd}|\p{Pc}|\p{Mn}|\p{Mc}|\p{Cf})*"));
 
     lexer
-}
-
-struct Token {
-    class: TokenClass,
-    regex: Regex,
-}
-
-struct Lexer {
-    tokens: Vec<Token>,
-}
-
-impl Lexer {
-    fn new() -> Lexer {
-        Lexer { tokens: vec![] }
-    }
-
-    fn define_token(&mut self, class: TokenClass, regex: Regex) {
-        self.tokens.push(Token { class: class, regex: regex });
-    }
-
-    fn lex(&self, text: &str) -> TokenIterator {
-        TokenIterator::new(&self.tokens[], text)
-    }
-}
-
-struct TokenIterator<'a> {
-    tokens: &'a [Token],
-    text: String,
-    idx: usize,
-}
-
-impl<'a> TokenIterator<'a> {
-    fn new(tokens: &'a [Token], text: &str) -> TokenIterator<'a> {
-        TokenIterator { tokens: tokens, text: String::from_str(text), idx: 0 }
-    }
-}
-
-impl<'a> Iterator for TokenIterator<'a> {
-    type Item = (TokenClass, String);
-
-    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        if self.idx == self.text.len() {
-            None
-        } else {
-            let textleft = &self.text[self.idx..];
-            for token in self.tokens.iter() {
-                if let Some((begin, end)) = token.regex.find(textleft) {
-                    self.idx += end;
-                    return Some((token.class.clone(), textleft[begin..end].to_string()));
-                }
-            }
-            self.idx += 1;
-            Some((Unknown, textleft[0..1].to_string()))
-        }
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        (0, Some(self.text.len() - self.idx))
-    }
 }
 
 #[cfg(test)]

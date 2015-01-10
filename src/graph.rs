@@ -352,7 +352,7 @@ impl<E> Edge<E> {
 
 #[cfg(test)]
 mod test {
-    use middle::graph::*;
+    use super::*;
     use std::fmt::Show;
 
     type TestNode = Node<&'static str>;

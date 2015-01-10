@@ -1,5 +1,6 @@
 #![feature(plugin)]
 #![feature(box_syntax)]
+#[macro_use] extern crate log;
 
 extern crate serialize;
 extern crate "rustc-serialize" as rustc_serialize;
@@ -18,6 +19,7 @@ use graph::Graph;
 mod graph;
 mod backend;
 mod files;
+mod lexer;
 
 docopt!(Args derive Show, "Usage: machete <path>");
 
