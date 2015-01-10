@@ -1,4 +1,5 @@
 #![feature(plugin)]
+#![feature(box_syntax)]
 
 extern crate serialize;
 extern crate "rustc-serialize" as rustc_serialize;
@@ -33,17 +34,17 @@ fn run(path: String) {
         exts.push_all(backend.get_extensions().as_slice());
     }
     
-    let groups = files::gather_files(path, exts.as_slice());
+    let groups = files::gather_files(path, &exts[]);
 
     for backend in backends.iter() {
         let mut fnames = vec![];
         for ext in backend.get_extensions().iter() {
             if let Some(results) = groups.get(ext) {
-                fnames.push_all(results.as_slice());
+                fnames.push_all(&results[]);
             }
         }
 
-        let g = backend.build_graph(fnames.as_slice(), GraphType::Reference);
+        let g = backend.build_graph(&fnames[], GraphType::Reference);
         print_ascii_graph(&g);
     }
 }

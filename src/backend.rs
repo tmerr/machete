@@ -1,6 +1,7 @@
 use graph::Graph;
+use std::io::File;
 use std::path::posix::Path;
-use self::TokenClass::{Whitespace, Newline, Comment, IdentifierOrKeyword, Unknown};
+use self::TokenClass::{Whitespace, Newline, Comment, BlockBegin, BlockEnd, IdentifierOrKeyword, Unknown};
 use regex::Regex;
 
 
@@ -33,6 +34,38 @@ impl LanguageBackend for Csharp {
         // We're going to assume the C# file has valid syntax and pull out the
         // exact information we need.
 
+        let lexer = build_csharp_lexer();
+    
+        for filename in filenames.iter() {
+            let mut file = File::open(filename);
+            //let mut text = "".to_string();
+            let text = match File::open(filename) {
+                Err(_) => {
+                    println!("Failed to open file");
+                    continue;
+                },
+                Ok(mut file) => {
+                    file.read_to_string().unwrap()
+                },
+            };
+
+            for tok in lexer.lex(&text[]) {
+                match (tok.0, &tok.1[]) {
+                    (Whitespace, _) => {},
+                    (Newline, _) => {},
+                    (Comment, _) => {},
+                    (BlockBegin, _) => {},
+                    (BlockEnd, _) => {},
+                    (IdentifierOrKeyword, "class") => {},
+                    (IdentifierOrKeyword, _) => {},
+                    (Unknown, _) => {},
+                }
+            }
+        }
+
+        //for tok in lexer.lex()
+
+
         let mut g = Graph::new();
 
         let a = g.add_node("a".to_string());
@@ -50,41 +83,24 @@ enum TokenClass {
     Whitespace,
     Newline,
     Comment,
+    BlockBegin,
+    BlockEnd,
     IdentifierOrKeyword,
     Unknown,
 }
 
-/*
-let tokens = [
-    token {
-        class: Whitespace,
-        regex: regex!(r"^\p{Zs}|\x{0009}|\x{000B}\x{000C}"),
-    },
-    token {
-        class: Newline,
-        regex: regex!(r"^\x{000D}\x{000A}\|x{000D}|\x{000A}|\x{2028}|\x{2029}"),
-    },
-    token {
-        class: Comment,
-        */
-        //regex: regex!(r"^(/\*[^\*/]\*/)|(//[^\x{000D}\x{000A}\x{2028}\x{2029})"),
-        /*
-    },
-    token {
-        class: BlockBegin,
-        regex: regex!(r"^{"),
-    },
-    token {
-        class: BlockEnd,
-        regex: regex!(r"^}"),
-    },
-    token {
-        class: IdentifierOrKeyword,
-        regex: regex!(r"^(_|\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl})" +
-                      r"(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}\p{Nd}|\p{Pc}|\p{Mn}|\p{Mc}|\p{Cf})*"),
-    }
-]
-*/
+fn build_csharp_lexer() -> Lexer {
+    let mut lexer = Lexer::new();
+
+    lexer.define_token(Whitespace, regex!(r"^\p{Zs}|\x{0009}|\x{000B}\x{000C}"));
+    lexer.define_token(Newline, regex!(r"^\x{000D}\x{000A}|\x{000D}|\x{000A}|\x{2028}|\x{2029}"));
+    lexer.define_token(Comment, regex!(r"^(/\*[^\*/]\*/)|(//[^\x{000D}\x{000A}\x{2028}\x{2029}])"));
+    lexer.define_token(BlockBegin, regex!(r"^\{"));
+    lexer.define_token(BlockEnd, regex!(r"^\}"));
+    lexer.define_token(IdentifierOrKeyword, regex!(r"^(_|\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl})(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}\p{Nd}|\p{Pc}|\p{Mn}|\p{Mc}|\p{Cf})*"));
+
+    lexer
+}
 
 struct Token {
     class: TokenClass,
@@ -105,15 +121,14 @@ impl Lexer {
     }
 
     fn lex(&self, text: &str) -> TokenIterator {
-        TokenIterator::new(self.tokens.as_slice(), text)
+        TokenIterator::new(&self.tokens[], text)
     }
 }
-
 
 struct TokenIterator<'a> {
     tokens: &'a [Token],
     text: String,
-    idx: uint,
+    idx: usize,
 }
 
 impl<'a> TokenIterator<'a> {
@@ -123,25 +138,30 @@ impl<'a> TokenIterator<'a> {
 }
 
 impl<'a> Iterator for TokenIterator<'a> {
-    type Item = TokenClass;
+    type Item = (TokenClass, String);
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         if self.idx == self.text.len() {
             None
         } else {
-            let textleft = self.text.slice_from(self.idx);
+            let textleft = &self.text[self.idx..];
             for token in self.tokens.iter() {
-                if let Some((_, end)) = token.regex.find(textleft) {
+                if let Some((begin, end)) = token.regex.find(textleft) {
                     self.idx += end;
-                    return Some(token.class.clone());
+                    return Some((token.class.clone(), textleft[begin..end].to_string()));
                 }
             }
             self.idx += 1;
-            Some(Unknown)
+            Some((Unknown, textleft[0..1].to_string()))
         }
     }
 
-    fn size_hint(&self) -> (uint, Option<uint>) {
+    fn size_hint(&self) -> (usize, Option<usize>) {
         (0, Some(self.text.len() - self.idx))
     }
+}
+
+#[cfg(test)]
+mod tests {
+
 }
