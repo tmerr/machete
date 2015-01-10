@@ -32,21 +32,32 @@ impl LanguageBackend for Csharp {
         vec!["cs".to_string()]
     }
 
-    fn build_graphs(&self, filenames: &[Path]) -> Vec<GraphInfo> {
-        // Here's a graph where classes constitute the nodes.
-        // Edges are formed when such classes reference instances of one another.
+    /// Build a graph where classes constitute the nodes, and edges are
+    /// formed by references between them.
+    fn build_graphs(&self, paths: &[Path]) -> Vec<GraphInfo> {
         // We're going to assume the C# file has valid syntax and pull out the
         // exact information we need.
-
+        
         let mut g = Graph::new();
+        
+        let map = build_map(paths);
 
-        let a = g.add_node("a".to_string());
-        let b = g.add_node("b".to_string());
-        let c = g.add_node("c".to_string());
+        let mut nodes = HashMap::new();
+        for classname in map.keys() {
+            nodes.insert(classname, g.add_node(classname.to_string()));
+        }
 
-        g.add_edge(a, b, ());
+        for nameA in map.keys() {
+            for (nameB, set) in map.iter() {
+                if set.contains(nameA) {
+                    g.add_edge(*nodes.get(nameA).unwrap(), *nodes.get(nameB).unwrap(), ());
+                }
+            }
+        }
+
         let mut vec = Vec::new();
-        vec.push(GraphInfo { name: "reference graph".to_string(), graph: g} );
+        vec.push(GraphInfo { name: "reference graph".to_string(), graph: g});
+
         vec
     }
 }
@@ -57,6 +68,8 @@ fn build_map(paths: &[Path]) -> HashMap<String, HashSet<String>> {
     let mut map = HashMap::new();
 
     for path in paths.iter() {
+        println!("Boop");
+
         let text = match File::open(path) {
             Err(_) => {
                 println!("Failed to open file");

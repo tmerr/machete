@@ -52,8 +52,10 @@ impl<'a, T: Clone> Iterator for TokenIterator<'a, T> {
                     return Some((Matched(class.clone()), textleft[begin..end].to_string()));
                 }
             }
-            self.idx += 1;
-            Some((Unmatched, textleft[0..1].to_string()))
+
+            let ch = textleft.slice_chars(0, 1);
+            self.idx += ch.len();
+            Some((Unmatched, ch.to_string()))
         }
     }
 
