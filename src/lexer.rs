@@ -1,6 +1,6 @@
 use regex::Regex;
 
-pub use self::Result::{Matched, Unmatched};
+pub use self::Token::{Matched, Unmatched};
 
 pub struct Lexer<T> {
     tokens: Vec<(T, Regex)>,
@@ -20,7 +20,8 @@ impl<T> Lexer<T> {
     }
 }
 
-pub enum Result<T: Clone> {
+#[derive(PartialEq, Clone, Show)]
+pub enum Token<T> {
     Matched(T),
     Unmatched,
 }
@@ -38,7 +39,7 @@ impl<'a, T> TokenIterator<'a, T> {
 }
 
 impl<'a, T: Clone> Iterator for TokenIterator<'a, T> {
-    type Item = (Result<T>, String);
+    type Item = (Token<T>, String);
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         if self.idx == self.text.len() {
@@ -73,7 +74,7 @@ mod tests {
         lexer.define_token("letters", regex!(r"^([a-zA-Z])+"));
         lexer.define_token("numbers", regex!(r"^[0-9]+"));
 
-        let vec: Vec<(Result<&str>, String)> = lexer.lex("apple bat 42  cat").collect();
+        let vec: Vec<(Token<&str>, String)> = lexer.lex("apple bat 42  cat").collect();
         let tokentypes: Vec<&str> = vec.iter().map(|v| match v.0 { Matched(x) => x, _ => panic!("nope") } ).collect();
         let texts: Vec<String> = vec.iter().map(|v| v.1.clone()).collect();
 
