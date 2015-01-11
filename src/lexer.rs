@@ -26,20 +26,20 @@ pub enum Token<T> {
     Unmatched,
 }
 
-pub struct TokenIterator<'a, T: 'a> {
+pub struct TokenIterator<'a, 'b, T: 'a> {
     tokens: &'a [(T, Regex)],
     text: String,
     idx: usize,
 }
 
-impl<'a, T> TokenIterator<'a, T> {
-    fn new(tokens: &'a [(T, Regex)], text: &str) -> TokenIterator<'a, T> {
+impl<'a, 'b, T> TokenIterator<'a, 'b, T> {
+    fn new(tokens: &'a [(T, Regex)], text: &str) -> TokenIterator<'a, 'b, T> {
         TokenIterator { tokens: tokens, text: String::from_str(text), idx: 0 }
     }
 }
 
-impl<'a, T: Clone> Iterator for TokenIterator<'a, T> {
-    type Item = (Token<T>, String);
+impl<'a, 'b, T: Clone> Iterator for TokenIterator<'a, 'b, T> {
+    type Item = (Token<T>, &'b str);
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         if self.idx == self.text.len() {
@@ -49,13 +49,13 @@ impl<'a, T: Clone> Iterator for TokenIterator<'a, T> {
             for &(ref class, ref regex) in self.tokens.iter() {
                 if let Some((begin, end)) = regex.find(textleft) {
                     self.idx += end;
-                    return Some((Matched(class.clone()), textleft[begin..end].to_string()));
+                    return Some((Matched(class.clone()), &textleft[begin..end]));
                 }
             }
 
             let ch = textleft.slice_chars(0, 1);
             self.idx += ch.len();
-            Some((Unmatched, ch.to_string()))
+            Some((Unmatched, ch))
         }
     }
 
@@ -76,9 +76,9 @@ mod tests {
         lexer.define_token("letters", regex!(r"^([a-zA-Z])+"));
         lexer.define_token("numbers", regex!(r"^[0-9]+"));
 
-        let vec: Vec<(Token<&str>, String)> = lexer.lex("apple bat 42  cat").collect();
+        let vec: Vec<(Token<&str>, &str)> = lexer.lex("apple bat 42  cat").collect();
         let tokentypes: Vec<&str> = vec.iter().map(|v| match v.0 { Matched(x) => x, _ => panic!("nope") } ).collect();
-        let texts: Vec<String> = vec.iter().map(|v| v.1.clone()).collect();
+        let texts: Vec<&str> = vec.iter().map(|v| v.1.clone()).collect();
 
         assert_eq!(&tokentypes[], ["letters", "space", "letters", "space", "numbers", "space", "letters"]);
         assert_eq!(&texts[], ["apple", " ", "bat", " ", "42", "  ", "cat"]);

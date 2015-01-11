@@ -83,7 +83,7 @@ fn build_map(paths: &[Path]) -> HashMap<String, HashSet<String>> {
         let mut tokens = lexer.lex(&text[]);
         loop {
             if let Some(tok) = tokens.next() {
-                match (tok.0, &tok.1[]) {
+                match (tok.0, tok.1) {
                     (Matched(IdentifierOrKeyword), "class") => {
                         if let Some((classname, wordset)) = class_x(&mut tokens) {
                             map.insert(classname, wordset);
@@ -107,7 +107,7 @@ fn class_x(tokens: &mut TokenIterator<TokenClass>) -> Option<(String, HashSet<St
 
     let classname = {
         let tok = unwrap_or_return!(next_meaningful(tokens), None);
-        match (tok.0, &tok.1[]) {
+        match (tok.0, tok.1) {
             (Matched(IdentifierOrKeyword), x) => x.to_string(),
             _ => return None,
         }
@@ -123,7 +123,7 @@ fn class_x(tokens: &mut TokenIterator<TokenClass>) -> Option<(String, HashSet<St
     
     while block_depth >= 0 {
         let tok = unwrap_or_return!(next_meaningful(tokens), None);
-        match (tok.0, &tok.1[]) {
+        match (tok.0, tok.1) {
             (Matched(BlockBegin), x) => { block_depth += 1; },
             (Matched(BlockEnd), x) => { block_depth -= 1; },
             (Matched(IdentifierOrKeyword), x) => { set.insert(x.to_string()); },
@@ -138,7 +138,7 @@ fn class_x(tokens: &mut TokenIterator<TokenClass>) -> Option<(String, HashSet<St
 fn next_meaningful(tokens: &mut TokenIterator<TokenClass>) -> Option<(Token<TokenClass>, String)> {
     loop {
         let tok = unwrap_or_return!(tokens.next(), None);
-        match (tok.0, &tok.1[]) {
+        match (tok.0, tok.1) {
             (Matched(Whitespace), x) => {},
             (Matched(Newline), x) => {},
             (Matched(Comment), x) => {},
@@ -181,7 +181,7 @@ mod tests {
     #[test]
     fn test_csharp_lexer() {
         let lexer = super::build_csharp_lexer();
-        let result: Vec<(Token<TokenClass>, String)> = lexer.lex("class Fizz\n{\nBuzz buzz;\n}").collect();
+        let result: Vec<(Token<TokenClass>, &str)> = lexer.lex("class Fizz\n{\nBuzz buzz;\n}").collect();
         let kind: Vec<Token<TokenClass>> = result.iter().map(|r| r.0.clone()).collect();
         let expected = [Matched(IdentifierOrKeyword), Matched(Whitespace), Matched(IdentifierOrKeyword),
                         Matched(Newline), Matched(BlockBegin), Matched(Newline), Matched(IdentifierOrKeyword),

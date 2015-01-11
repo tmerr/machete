@@ -11,6 +11,8 @@ extern crate docopt;
 extern crate regex;
 #[no_link] #[plugin] extern crate regex_macros;
 
+extern crate test;
+
 use docopt::Docopt;
 use backend::LanguageBackend;
 use graph::Graph;
@@ -20,6 +22,7 @@ mod backend;
 mod files;
 mod lexer;
 mod csharp;
+mod bench;
 
 docopt!(Args derive Show, "Usage: machete <path>");
 
