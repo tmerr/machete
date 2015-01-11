@@ -50,7 +50,7 @@ impl LanguageBackend for Csharp {
         for nameA in map.keys() {
             for (nameB, set) in map.iter() {
                 if set.contains(nameA) {
-                    g.add_edge(*nodes.get(nameA).unwrap(), *nodes.get(nameB).unwrap(), ());
+                    g.add_edge(*nodes.get(nameB).unwrap(), *nodes.get(nameA).unwrap(), ());
                 }
             }
         }
@@ -84,9 +84,11 @@ fn build_map(paths: &[Path]) -> HashMap<String, HashSet<String>> {
         loop {
             if let Some(tok) = tokens.next() {
                 match (tok.0, tok.1) {
-                    (Matched(IdentifierOrKeyword), "class") => {
-                        if let Some((classname, wordset)) = class_x(&mut tokens) {
-                            map.insert(classname, wordset);
+                    (Matched(IdentifierOrKeyword), txt) => {
+                        if txt == "class" || txt == "struct" {
+                            if let Some((classname, wordset)) = class_x(&mut tokens) {
+                                map.insert(classname, wordset);
+                            }
                         }
                     },
                     _ => {},
