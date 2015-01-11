@@ -167,7 +167,7 @@ fn build_csharp_lexer() -> Lexer<TokenClass> {
     lexer.define_token(Comment, regex!(r"^((/\*[^\*/]\*/)|(//[^\x{000D}\x{000A}\x{2028}\x{2029}]*))"));
     lexer.define_token(BlockBegin, regex!(r"^\{"));
     lexer.define_token(BlockEnd, regex!(r"^\}"));
-    lexer.define_token(IdentifierOrKeyword, regex!(r"^((_|\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl})(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}\p{Nd}|\p{Pc}|\p{Mn}|\p{Mc}|\p{Cf})*)"));
+    lexer.define_token(IdentifierOrKeyword, regex!(r"^((_|\p{L}|\p{Nl})(\p{L}|\p{Nl}\p{Nd}|\p{Pc}|\p{Mn}|\p{Mc}|\p{Cf})*)"));
 
     lexer
 }
