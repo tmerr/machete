@@ -56,7 +56,7 @@ impl LanguageBackend for Csharp {
         }
 
         let mut vec = Vec::new();
-        vec.push(GraphInfo { name: "reference graph".to_string(), graph: g});
+        vec.push(GraphInfo { name: "reference_graph".to_string(), graph: g});
 
         vec
     }
@@ -68,8 +68,6 @@ fn build_map(paths: &[Path]) -> HashMap<String, HashSet<String>> {
     let mut map = HashMap::new();
 
     for path in paths.iter() {
-        println!("Boop");
-
         let text = match File::open(path) {
             Err(_) => {
                 println!("Failed to open file");

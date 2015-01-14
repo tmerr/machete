@@ -66,7 +66,7 @@ pub struct NodeIndex(pub uint);
 #[allow(non_upper_case_globals)]
 pub const InvalidNodeIndex: NodeIndex = NodeIndex(uint::MAX);
 
-#[derive(Copy, PartialEq, Show)]
+#[derive(Clone, Copy, PartialEq, Show)]
 pub struct EdgeIndex(pub uint);
 #[allow(non_upper_case_globals)]
 pub const InvalidEdgeIndex: EdgeIndex = EdgeIndex(uint::MAX);

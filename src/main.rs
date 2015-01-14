@@ -11,6 +11,7 @@ extern crate docopt;
 extern crate regex;
 #[no_link] #[plugin] extern crate regex_macros;
 
+extern crate graphviz;
 extern crate test;
 
 use docopt::Docopt;
@@ -22,6 +23,7 @@ mod backend;
 mod files;
 mod lexer;
 mod csharp;
+mod todot;
 mod bench;
 
 docopt!(Args derive Show, "Usage: machete <path>");
@@ -50,8 +52,10 @@ fn run(path: String) {
         }
 
         let gs = backend.build_graphs(&fnames[]);
+
+        let mut out = std::io::stdio::stdout();
         for g in gs.iter() {
-            print_ascii_graph(&g.graph);
+            todot::render(g, &mut out);
         }
     }
 }
