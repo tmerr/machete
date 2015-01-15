@@ -41,7 +41,17 @@ fn run(path: String) {
         exts.push_all(backend.get_extensions().as_slice());
     }
     
-    let groups = files::gather_files(path, &exts[]);
+    let groups = match files::gather_files(&path[], &exts[]) {
+        Ok(g) => g,
+        Err(std::io::IoError{kind:std::io::IoErrorKind::FileNotFound, desc:_, detail:_}) => {
+            println!("machete: {}: No such directory.", &path[]);
+            return;
+        },
+        Err(_) => {
+            println!("machete: {}: Failed to read directory.", &path[]);
+            return;
+        }
+    };
 
     for backend in backends.iter() {
         let mut fnames = vec![];

@@ -1,4 +1,5 @@
 use std::io::fs::walk_dir;
+use std::io::IoResult;
 use std::path::posix::Path;
 use std::collections::HashMap;
 
@@ -7,7 +8,7 @@ pub type GroupedFiles = HashMap<String, Vec<Path>>;
 
 /// Walks through the directory gathering files with the given extensions.
 /// Returns a map from each extension to file paths.
-pub fn gather_files(path: String, exts: &[String]) -> GroupedFiles {
+pub fn gather_files(path: &str, exts: &[String]) -> IoResult<GroupedFiles> {
     let thepath = Path::new(path);
     let mut groups = HashMap::new();
 
@@ -24,9 +25,10 @@ pub fn gather_files(path: String, exts: &[String]) -> GroupedFiles {
                     }
                 }
             }
+            return Ok(groups);
         },
-        Err(_) => panic!("Failed to open directory"),
-    };
-
-    groups
+        Err(e) => {
+            return Err(e);
+        }
+    }
 }
