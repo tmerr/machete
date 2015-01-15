@@ -4,7 +4,7 @@ use regex::Regex;
 use std::collections::{HashSet, HashMap};
 
 use graph::Graph;
-use self::TokenClass::{Whitespace, Newline, Comment, BlockBegin, BlockEnd, IdentifierOrKeyword};
+use self::TokenClass::{Whitespace, Newline, Comment, StringLiteral, BlockBegin, BlockEnd, IdentifierOrKeyword};
 use lexer::Lexer;
 use lexer::TokenIterator;
 use lexer::Token::{Matched, Unmatched};
@@ -152,6 +152,7 @@ enum TokenClass {
     Whitespace,
     Newline,
     Comment,
+    StringLiteral,
     BlockBegin,
     BlockEnd,
     IdentifierOrKeyword,
@@ -163,6 +164,7 @@ fn build_csharp_lexer() -> Lexer<TokenClass> {
     lexer.define_token(Whitespace, regex!(r"^(\p{Zs}|\x{0009}|\x{000B}\x{000C})"));
     lexer.define_token(Newline, regex!(r"^((\x{000D}\x{000A})|\x{000D}|\x{000A}|\x{2028}|\x{2029})"));
     lexer.define_token(Comment, regex!(r"^((/\*[^\*/]\*/)|(//[^\x{000D}\x{000A}\x{2028}\x{2029}]*))"));
+    lexer.define_token(StringLiteral, regex!(r##"^"([^"\n\\]|\\'|\\"|\\\\|\\0|\\a|\\b|\\f|\\n|\\r|\\t|\\v|(\\x[0-9A-Fa-f]{1,4})|(\\u[0-9A-Fa-f]{4})|(\\U[0-9A-Fa-f]{8}))*""##));
     lexer.define_token(BlockBegin, regex!(r"^\{"));
     lexer.define_token(BlockEnd, regex!(r"^\}"));
     lexer.define_token(IdentifierOrKeyword, regex!(r"^((_|\p{L}|\p{Nl})(\p{L}|\p{Nl}\p{Nd}|\p{Pc}|\p{Mn}|\p{Mc}|\p{Cf})*)"));
